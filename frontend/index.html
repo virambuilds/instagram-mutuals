@@ -4,21 +4,55 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Instagram Mutuals</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css" />
 </head>
-<body>
+<body data-theme="dark">
 
 <div class="app">
   <header>
-    <h1>Instagram Mutuals</h1>
-    <p class="subtitle">See who doesn't follow you back — using your own Instagram data export, nothing else.</p>
+    <div class="header-text">
+      <h1>Instagram Mutuals</h1>
+      <p class="subtitle">Your export data, analyzed locally. Nothing stored.</p>
+    </div>
+    <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">🌙</button>
   </header>
 
+  <div class="banner info">
+    <span class="icon">ⓘ</span>
+    <span>This is <strong>not real-time</strong>. Results are only as current as the export you upload — Instagram doesn't allow any app to check your live followers/following list. Re-export and re-upload whenever you want fresh numbers.</span>
+  </div>
+
+  <section class="card">
+    <button id="howto-toggle" class="diff-toggle">
+      <span id="howto-arrow">▸</span> how to get your Instagram export
+    </button>
+
+    <div id="howto-body" class="hidden">
+      <ol class="howto-steps">
+        <li>Open Instagram → <strong>Settings and activity</strong></li>
+        <li><strong>Accounts Centre</strong></li>
+        <li><strong>Your information and permissions</strong></li>
+        <li><strong>Export your information</strong></li>
+        <li><strong>Create export</strong></li>
+        <li>Choose <strong>Export to device</strong></li>
+        <li>Under date range, select <strong>All time</strong></li>
+        <li>Tap <strong>Customise information</strong></li>
+        <li>Under Connections, uncheck everything <strong>except Followers and Following</strong></li>
+        <li>Submit, wait for Instagram's email, then download and unzip the file</li>
+        <li>Upload <code>followers_1.html</code> and <code>following.html</code> below</li>
+      </ol>
+    </div>
+  </section>
+
   <section id="upload-section" class="card">
+    <p class="section-label">// analyze</p>
+
     <div class="field">
       <label for="followers-input">Followers file(s)</label>
       <input type="file" id="followers-input" accept=".html" multiple />
-      <span class="hint">followers_1.html (and followers_2.html, etc. if you have more than one)</span>
+      <span class="hint">followers_1.html, followers_2.html...</span>
     </div>
 
     <div class="field">
@@ -27,30 +61,70 @@
       <span class="hint">following.html</span>
     </div>
 
-    <button id="analyze-btn">Analyze</button>
+    <button id="analyze-btn" class="primary">Analyze</button>
     <p id="error-msg" class="error hidden"></p>
   </section>
 
   <section id="results-section" class="hidden">
+
+    <div id="date-range-banner" class="banner hidden">
+      <span class="icon">⚠</span>
+      <span id="date-range-text"></span>
+    </div>
+
     <div class="stats">
       <div class="stat"><span id="stat-followers" class="stat-number">0</span><span class="stat-label">Followers</span></div>
       <div class="stat"><span id="stat-following" class="stat-number">0</span><span class="stat-label">Following</span></div>
-      <div class="stat"><span id="stat-mutuals" class="stat-number">0</span><span class="stat-label">Mutuals</span></div>
-      <div class="stat"><span id="stat-not-back" class="stat-number">0</span><span class="stat-label">Not following you back</span></div>
-      <div class="stat"><span id="stat-you-not-back" class="stat-number">0</span><span class="stat-label">You don't follow back</span></div>
+      <div class="stat positive"><span id="stat-mutuals" class="stat-number">0</span><span class="stat-label">Mutuals</span></div>
+      <div class="stat negative"><span id="stat-not-back" class="stat-number">0</span><span class="stat-label">Not back</span></div>
+      <div class="stat"><span id="stat-you-not-back" class="stat-number">0</span><span class="stat-label">You don't</span></div>
     </div>
 
-    <input type="text" id="search-input" placeholder="Search usernames..." />
+    <div class="toolbar">
+      <input type="text" id="search-input" placeholder="search username..." />
+    </div>
 
     <div class="tabs">
-      <button class="tab-btn active" data-tab="not-following-back">Not following you back</button>
-      <button class="tab-btn" data-tab="you-not-following-back">You don't follow back</button>
+      <button class="tab-btn active" data-tab="not-following-back">Not following back</button>
+      <button class="tab-btn" data-tab="you-not-following-back">You don't follow</button>
       <button class="tab-btn" data-tab="mutuals">Mutuals</button>
     </div>
 
-    <ul id="list-not-following-back" class="user-list"></ul>
-    <ul id="list-you-not-following-back" class="user-list hidden"></ul>
-    <ul id="list-mutuals" class="user-list hidden"></ul>
+    <ul id="list-not-following-back" class="user-list" data-kind="not-following-back"></ul>
+    <ul id="list-you-not-following-back" class="user-list hidden" data-kind="you-not-following-back"></ul>
+    <ul id="list-mutuals" class="user-list hidden" data-kind="mutuals"></ul>
+
+    <div class="results-footer">
+      <button id="export-csv-btn" class="secondary">↓ export csv</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <button id="diff-toggle" class="diff-toggle">
+      <span id="diff-arrow">▸</span> compare two exports (who unfollowed / newly followed)
+    </button>
+
+    <div id="diff-body" class="hidden diff-results">
+      <div class="field">
+        <label for="diff-previous-input">Older export</label>
+        <input type="file" id="diff-previous-input" accept=".html" />
+        <span class="hint">an earlier followers_1.html or following.html</span>
+      </div>
+      <div class="field">
+        <label for="diff-current-input">Newer export</label>
+        <input type="file" id="diff-current-input" accept=".html" />
+        <span class="hint">the same file type, downloaded more recently</span>
+      </div>
+      <button id="diff-btn" class="primary">Compare</button>
+      <p id="diff-error-msg" class="error hidden"></p>
+
+      <div id="diff-output" class="hidden">
+        <p class="diff-column-title added">+ added</p>
+        <ul id="diff-added-list" class="user-list"></ul>
+        <p class="diff-column-title removed">− removed</p>
+        <ul id="diff-removed-list" class="user-list"></ul>
+      </div>
+    </div>
   </section>
 </div>
 
