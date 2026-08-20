@@ -211,57 +211,87 @@ function renderDateRangeBanner(followersRange, followingRange) {
 }
 
 /* ---------------------------------------------------------
-   Growth chart — plain divs, height = count, no chart library
+   Growth chart — Chart.js, horizontally scrollable, one
+   data point per month from the very first to the most recent.
 --------------------------------------------------------- */
+let growthChartInstance = null;
+
 function renderGrowthChart(timeline) {
   const section = document.getElementById("growth-chart-section");
-  const chart = document.getElementById("growth-chart");
-  const xaxis = document.getElementById("growth-xaxis");
-  const yaxis = document.getElementById("growth-yaxis");
-  chart.innerHTML = "";
-  xaxis.innerHTML = "";
-  yaxis.innerHTML = "";
+  const canvas = document.getElementById("growth-chart-canvas");
 
   if (!timeline || timeline.length === 0) {
     section.classList.add("hidden");
     return;
   }
 
-  const maxValue = Math.max(1, ...timeline.map((m) => Math.max(m.followers_gained, m.following_gained)));
+  // Fixed width per month keeps every label readable regardless of
+  // how many months there are — the container scrolls horizontally
+  // instead of cramming everything into one fixed width.
+  const PX_PER_MONTH = 48;
+  canvas.style.width = `${Math.max(400, timeline.length * PX_PER_MONTH)}px`;
 
-  // Y-axis: three reference lines, top to bottom (CSS renders this
-  // column top-aligned to match the bar area).
-  yaxis.innerHTML = `<span>${maxValue}</span><span>${Math.round(maxValue / 2)}</span><span>0</span>`;
+  const labels = timeline.map((m) => formatMonthLabel(m.month));
+  const followerData = timeline.map((m) => m.followers_gained);
+  const followingData = timeline.map((m) => m.following_gained);
 
-  // X-axis: labelling every month would overlap at any real data
-  // volume, so only label a subset — spaced out enough to stay
-  // readable, always including the first and last month.
-  const labelEvery = Math.max(1, Math.ceil(timeline.length / 10));
+  const styles = getComputedStyle(document.body);
+  const positiveColor = styles.getPropertyValue("--positive").trim();
+  const accentColor = styles.getPropertyValue("--accent").trim();
+  const gridColor = styles.getPropertyValue("--border").trim();
+  const textColor = styles.getPropertyValue("--text-muted").trim();
 
-  timeline.forEach((month, i) => {
-    const col = document.createElement("div");
-    col.className = "growth-month";
-    col.title = `${month.month}: +${month.followers_gained} followers, +${month.following_gained} following`;
+  if (growthChartInstance) {
+    growthChartInstance.destroy();
+  }
 
-    const followerBar = document.createElement("div");
-    followerBar.className = "growth-bar followers";
-    followerBar.style.height = `${(month.followers_gained / maxValue) * 100}%`;
-
-    const followingBar = document.createElement("div");
-    followingBar.className = "growth-bar following";
-    followingBar.style.height = `${(month.following_gained / maxValue) * 100}%`;
-
-    col.appendChild(followerBar);
-    col.appendChild(followingBar);
-    chart.appendChild(col);
-
-    const label = document.createElement("div");
-    label.className = "growth-xaxis-label";
-    const isEdge = i === 0 || i === timeline.length - 1;
-    if (isEdge || i % labelEvery === 0) {
-      label.textContent = formatMonthLabel(month.month);
-    }
-    xaxis.appendChild(label);
+  growthChartInstance = new Chart(canvas, {
+    type: "line",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: "Followers gained",
+          data: followerData,
+          borderColor: positiveColor,
+          backgroundColor: positiveColor + "22",
+          tension: 0.3,
+          fill: true,
+          pointRadius: 2,
+        },
+        {
+          label: "Following added",
+          data: followingData,
+          borderColor: accentColor,
+          backgroundColor: accentColor + "22",
+          tension: 0.3,
+          fill: true,
+          pointRadius: 2,
+        },
+      ],
+    },
+    options: {
+      responsive: false,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: "bottom",
+          labels: { color: textColor, font: { size: 11 }, boxWidth: 10 },
+        },
+        tooltip: { mode: "index", intersect: false },
+      },
+      scales: {
+        x: {
+          ticks: { color: textColor, font: { size: 10 }, maxRotation: 45, minRotation: 45 },
+          grid: { color: gridColor },
+        },
+        y: {
+          beginAtZero: true,
+          ticks: { color: textColor, font: { size: 10 } },
+          grid: { color: gridColor },
+        },
+      },
+    },
   });
 
   section.classList.remove("hidden");
@@ -365,38 +395,6 @@ function showError(message) {
 }
 function hideError() {
   document.getElementById("error-msg").classList.add("hidden");
-}
-
-/* ---------------------------------------------------------
-   CSV export
---------------------------------------------------------- */
-document.getElementById("export-csv-btn").addEventListener("click", () => {
-  const rows = [["username", "category", "followed_at"]];
-  const categories = {
-    mutuals: "mutual",
-    not_following_back: "not_following_back",
-    im_not_following_back: "you_dont_follow_back",
-  };
-
-  for (const [key, label] of Object.entries(categories)) {
-    for (const entry of currentResults[key]) {
-      rows.push([entry.username, label, entry.followed_at || ""]);
-    }
-  }
-
-  const csv = rows.map((r) => r.map(escapeCsvCell).join(",")).join("\n");
-  const blob = new Blob([csv], { type: "text/csv" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "instagram-mutuals.csv";
-  a.click();
-  URL.revokeObjectURL(url);
-});
-
-function escapeCsvCell(cell) {
-  const str = String(cell);
-  return /[",\n]/.test(str) ? `"${str.replace(/"/g, '""')}"` : str;
 }
 
 /* ---------------------------------------------------------

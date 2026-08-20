@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 </head>
 <body data-theme="dark">
 
@@ -14,14 +15,16 @@
   <header>
     <div class="header-text">
       <h1>Instagram Mutuals</h1>
-      <p class="subtitle">Your export data, analyzed locally. Nothing stored.</p>
+      <p class="subtitle">Some follow you. Some don't. Find out who.</p>
     </div>
     <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme"></button>
   </header>
 
-  <div class="banner info">
-    <span>Not real-time — results only reflect the export you upload. Instagram doesn't let any app check your live followers/following list. Re-export and re-upload whenever you want fresh numbers.</span>
-  </div>
+  <section class="card">
+    <p class="explainer">
+      Instagram doesn't let you see, in one place, <strong>which accounts you follow don't follow you back</strong>, or <strong>which of your followers you haven't followed back</strong>. This tool reads your own exported Instagram data and sorts everyone into three groups: mutual follows, people you follow who don't follow you, and people who follow you who you don't follow.
+    </p>
+  </section>
 
   <section class="card">
     <button id="howto-toggle" class="collapsible-toggle">
@@ -44,6 +47,14 @@
       </ol>
     </div>
   </section>
+
+  <div class="banner safe">
+    <span><strong>Safe to use.</strong> Your file is analyzed in your browser session and never saved anywhere — not on a server, not in a database. Nothing about your account is stored after you close this page.</span>
+  </div>
+
+  <div class="banner info">
+    <span><strong>Not real-time.</strong> Results only reflect the export you upload. Instagram doesn't let any app check your live followers/following list. Re-export and re-upload whenever you want fresh numbers.</span>
+  </div>
 
   <section id="upload-section" class="card">
     <div class="field">
@@ -89,16 +100,8 @@
 
     <div id="growth-chart-section" class="card hidden">
       <p class="card-title">Growth over time</p>
-      <div class="growth-chart-wrap">
-        <div id="growth-yaxis" class="growth-yaxis"></div>
-        <div class="growth-chart-scroll">
-          <div id="growth-chart" class="growth-chart"></div>
-          <div id="growth-xaxis" class="growth-xaxis"></div>
-        </div>
-      </div>
-      <div class="growth-legend">
-        <span class="legend-item"><span class="legend-dot followers"></span>Followers gained</span>
-        <span class="legend-item"><span class="legend-dot following"></span>Following added</span>
+      <div class="growth-chart-scroll">
+        <canvas id="growth-chart-canvas"></canvas>
       </div>
     </div>
 
@@ -120,10 +123,6 @@
     <ul id="list-not-following-back" class="user-list" data-kind="not-following-back"></ul>
     <ul id="list-you-not-following-back" class="user-list hidden" data-kind="you-not-following-back"></ul>
     <ul id="list-mutuals" class="user-list hidden" data-kind="mutuals"></ul>
-
-    <div class="results-footer">
-      <button id="export-csv-btn" class="secondary">Export CSV</button>
-    </div>
   </section>
 
   <section class="card">

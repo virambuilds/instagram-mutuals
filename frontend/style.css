@@ -76,7 +76,8 @@ header {
 
 .header-text .subtitle {
   color: var(--text-muted);
-  font-size: 13px;
+  font-size: 14px;
+  font-weight: 500;
   margin: 0;
 }
 
@@ -180,6 +181,16 @@ button.secondary:hover { border-color: var(--accent); color: var(--accent); }
 }
 .banner.info { border-left: 3px solid var(--accent); }
 .banner.warning { border-left: 3px solid var(--warning); }
+.banner.safe { border-left: 3px solid var(--positive); }
+.banner.safe strong { color: var(--positive); }
+
+.explainer {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--text-muted);
+  margin: 0;
+}
+.explainer strong { color: var(--text); }
 .banner strong { color: var(--text); }
 
 /* ---------------------------------------------------------
@@ -312,88 +323,17 @@ button.secondary:hover { border-color: var(--accent); color: var(--accent); }
 .stat.negative .stat-number { color: var(--negative); }
 
 /* ---------------------------------------------------------
-   Growth chart — hand-built bars, no dependency
+   Growth chart — Chart.js canvas, sized by month count and
+   scrolled horizontally so every month gets room.
 --------------------------------------------------------- */
-.growth-chart-wrap {
-  display: flex;
-  gap: 8px;
-}
-
-.growth-yaxis {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  height: 100px;
-  padding-top: 10px;
-  font-size: 9px;
-  color: var(--text-muted);
-  text-align: right;
-  flex-shrink: 0;
-  width: 24px;
-}
-
 .growth-chart-scroll {
-  flex: 1;
   overflow-x: auto;
+  padding-bottom: 4px;
 }
 
-.growth-chart {
-  display: flex;
-  align-items: flex-end;
-  gap: 3px;
-  height: 100px;
-  padding-top: 10px;
+#growth-chart-canvas {
+  height: 220px !important;
 }
-
-.growth-month {
-  display: flex;
-  align-items: flex-end;
-  gap: 1px;
-  flex-shrink: 0;
-  width: 10px;
-  height: 100%;
-  position: relative;
-}
-
-.growth-bar {
-  width: 4px;
-  border-radius: 2px 2px 0 0;
-  min-height: 2px;
-}
-.growth-bar.followers { background: var(--positive); }
-.growth-bar.following { background: var(--accent); }
-
-.growth-xaxis {
-  display: flex;
-  gap: 3px;
-  margin-top: 4px;
-}
-
-.growth-xaxis-label {
-  flex-shrink: 0;
-  width: 10px;
-  font-size: 8px;
-  color: var(--text-muted);
-  white-space: nowrap;
-  transform: rotate(-55deg) translateX(-4px);
-  transform-origin: top left;
-}
-
-.growth-legend {
-  display: flex;
-  gap: 16px;
-  margin-top: 30px;
-}
-.legend-item {
-  font-size: 11px;
-  color: var(--text-muted);
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-.legend-dot { width: 7px; height: 7px; border-radius: 50%; }
-.legend-dot.followers { background: var(--positive); }
-.legend-dot.following { background: var(--accent); }
 
 /* ---------------------------------------------------------
    Toolbar (search + sort)
