@@ -20,6 +20,7 @@ whitespace, stray punctuation from bad copies, etc).
 """
 
 import re
+from datetime import datetime
 from bs4 import BeautifulSoup
 
 # Matches the export header text, e.g.:
@@ -27,6 +28,24 @@ from bs4 import BeautifulSoup
 _DATE_RANGE_PATTERN = re.compile(
     r"Contains data that you requested from (.+?) to (.+)"
 )
+
+# Instagram's per-entry timestamp format, e.g. "Aug 03, 2026 7:37 am"
+_TIMESTAMP_FORMAT = "%b %d, %Y %I:%M %p"
+
+
+def parse_timestamp(text: str | None) -> datetime | None:
+    """
+    Parses Instagram's per-entry timestamp string into a real datetime,
+    used for chronological sorting and the growth-over-time chart. The
+    raw text is still kept separately for display, since it's already
+    in a readable format users expect.
+    """
+    if not text:
+        return None
+    try:
+        return datetime.strptime(text, _TIMESTAMP_FORMAT)
+    except ValueError:
+        return None
 
 
 def normalize_username(username: str) -> str:

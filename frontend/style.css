@@ -1,7 +1,5 @@
 /* ---------------------------------------------------------
    Design tokens
-   Dark (default): deep space-navy, electric-blue accent.
-   Light: inverted but keeps the same accent relationships.
 --------------------------------------------------------- */
 :root {
   --bg: #0b0e14;
@@ -11,13 +9,13 @@
   --text: #e7eaf3;
   --text-muted: #7c8296;
   --accent: #5b8cff;
-  --accent-dim: #5b8cff33;
+  --accent-dim: #5b8cff26;
   --positive: #00e5a0;
-  --positive-dim: #00e5a022;
+  --positive-dim: #00e5a01f;
   --negative: #ff5c7a;
-  --negative-dim: #ff5c7a22;
+  --negative-dim: #ff5c7a1f;
   --warning: #ffb347;
-  --warning-dim: #ffb34722;
+  --warning-dim: #ffb3471f;
   --radius: 10px;
   --font-display: 'Space Grotesk', -apple-system, sans-serif;
   --font-body: 'Inter', -apple-system, sans-serif;
@@ -32,13 +30,13 @@
   --text: #14161f;
   --text-muted: #6b7080;
   --accent: #3b5fd9;
-  --accent-dim: #3b5fd91a;
+  --accent-dim: #3b5fd914;
   --positive: #009966;
-  --positive-dim: #00996614;
+  --positive-dim: #00996612;
   --negative: #d93b58;
-  --negative-dim: #d93b5814;
+  --negative-dim: #d93b5812;
   --warning: #c47a12;
-  --warning-dim: #c47a1214;
+  --warning-dim: #c47a1212;
 }
 
 * { box-sizing: border-box; }
@@ -53,9 +51,9 @@ body {
 }
 
 .app {
-  max-width: 640px;
+  max-width: 600px;
   margin: 0 auto;
-  padding: 20px 16px 64px;
+  padding: 28px 16px 48px;
 }
 
 /* ---------------------------------------------------------
@@ -63,16 +61,16 @@ body {
 --------------------------------------------------------- */
 header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   margin-bottom: 20px;
 }
 
 .header-text h1 {
   font-family: var(--font-display);
-  font-size: 20px;
+  font-size: 21px;
   font-weight: 600;
-  margin: 0 0 2px;
+  margin: 0 0 3px;
   letter-spacing: -0.01em;
 }
 
@@ -83,50 +81,52 @@ header {
 }
 
 .theme-toggle {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
   border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--text);
+  background: transparent;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
   flex-shrink: 0;
-  transition: border-color 0.15s;
+  margin-top: 2px;
+  position: relative;
 }
-.theme-toggle:hover { border-color: var(--accent); }
+.theme-toggle::before {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  transition: background 0.15s;
+}
+.theme-toggle:hover::before { background: var(--accent); }
 
 /* ---------------------------------------------------------
-   Cards / sections
+   Cards
 --------------------------------------------------------- */
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 18px;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
-.section-label {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-muted);
+.card-title {
+  font-size: 13px;
+  font-weight: 600;
   margin: 0 0 12px;
+  color: var(--text-muted);
 }
 
 .field { margin-bottom: 14px; display: flex; flex-direction: column; }
-.field label { font-weight: 600; font-size: 13px; margin-bottom: 6px; }
+.field label { font-weight: 500; font-size: 13px; margin-bottom: 6px; }
 .field input[type="file"] {
   font-size: 13px;
   color: var(--text-muted);
   padding: 6px 0;
 }
-.hint { font-size: 11px; color: var(--text-muted); margin-top: 4px; font-family: var(--font-mono); }
+.hint { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
 
 button.primary {
   width: 100%;
@@ -134,7 +134,7 @@ button.primary {
   border: none;
   border-radius: 8px;
   background: var(--accent);
-  color: #0b0e14;
+  color: #05070c;
   font-family: var(--font-display);
   font-size: 14px;
   font-weight: 600;
@@ -149,11 +149,10 @@ button.secondary {
   border: 1px solid var(--border);
   border-radius: 8px;
   background: transparent;
-  color: var(--text);
-  font-family: var(--font-mono);
+  color: var(--text-muted);
   font-size: 12px;
   cursor: pointer;
-  transition: border-color 0.15s;
+  transition: border-color 0.15s, color 0.15s;
 }
 button.secondary:hover { border-color: var(--accent); color: var(--accent); }
 
@@ -162,65 +161,127 @@ button.secondary:hover { border-color: var(--accent); color: var(--accent); }
   font-size: 13px;
   margin-top: 12px;
   margin-bottom: 0;
-  font-family: var(--font-mono);
 }
 
 .hidden { display: none !important; }
 
 /* ---------------------------------------------------------
-   Warning banner (export date-range)
+   Banners
 --------------------------------------------------------- */
 .banner {
-  display: flex;
-  gap: 10px;
-  align-items: flex-start;
   padding: 12px 14px;
   border-radius: 8px;
-  background: var(--warning-dim);
-  border: 1px solid var(--warning);
-  margin-bottom: 16px;
-  font-size: 12px;
-  line-height: 1.5;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  margin-bottom: 14px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--text-muted);
 }
-.banner .icon { color: var(--warning); font-family: var(--font-mono); flex-shrink: 0; }
-.banner strong { color: var(--warning); }
-
-.banner.info {
-  background: var(--accent-dim);
-  border-color: var(--accent);
-  margin-bottom: 16px;
-}
-.banner.info .icon { color: var(--accent); }
-.banner.info strong { color: var(--accent); }
+.banner.info { border-left: 3px solid var(--accent); }
+.banner.warning { border-left: 3px solid var(--warning); }
+.banner strong { color: var(--text); }
 
 /* ---------------------------------------------------------
-   How-to steps
+   Collapsible sections (how-to, diff)
 --------------------------------------------------------- */
+.collapsible-toggle {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 2px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.collapsible-toggle:hover { color: var(--accent); }
+.collapsible-toggle .arrow {
+  display: inline-block;
+  transition: transform 0.15s;
+  font-size: 15px;
+}
+.collapsible-toggle .arrow.open { transform: rotate(90deg); }
+
 .howto-steps {
-  margin: 14px 0 4px;
-  padding-left: 20px;
+  margin: 14px 0 2px;
+  padding-left: 18px;
   font-size: 13px;
   line-height: 1.9;
   color: var(--text-muted);
 }
 .howto-steps li strong { color: var(--text); font-weight: 600; }
-.howto-steps code {
-  font-family: var(--font-mono);
+
+.diff-results { margin-top: 14px; }
+
+/* ---------------------------------------------------------
+   Upload mode switch
+--------------------------------------------------------- */
+.mode-switch {
+  display: flex;
+  gap: 4px;
+  padding: 3px;
   background: var(--surface-raised);
-  padding: 1px 5px;
-  border-radius: 4px;
-  color: var(--accent);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  margin-bottom: 16px;
+}
+
+.mode-btn {
+  flex: 1;
+  padding: 8px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-muted);
   font-size: 12px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.mode-btn.active {
+  background: var(--accent);
+  color: #05070c;
+  font-weight: 600;
+}
+
+.zip-picker { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+
+.checkbox-list, .radio-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 180px;
+  overflow-y: auto;
+  padding: 8px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.checkbox-list label, .radio-list label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 400;
+  font-family: var(--font-mono);
+  color: var(--text);
+  cursor: pointer;
+  margin: 0;
 }
 
 /* ---------------------------------------------------------
-   Stats — node-cluster style
+   Stats
 --------------------------------------------------------- */
 .stats {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 8px;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .stat {
@@ -233,7 +294,7 @@ button.secondary:hover { border-color: var(--accent); color: var(--accent); }
 
 .stat-number {
   display: block;
-  font-family: var(--font-mono);
+  font-family: var(--font-display);
   font-size: 18px;
   font-weight: 600;
 }
@@ -244,15 +305,59 @@ button.secondary:hover { border-color: var(--accent); color: var(--accent); }
   color: var(--text-muted);
   margin-top: 2px;
   line-height: 1.3;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
 }
 
 .stat.positive .stat-number { color: var(--positive); }
 .stat.negative .stat-number { color: var(--negative); }
 
 /* ---------------------------------------------------------
-   Search + tabs
+   Growth chart — hand-built bars, no dependency
+--------------------------------------------------------- */
+.growth-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 100px;
+  padding-top: 10px;
+  overflow-x: auto;
+}
+
+.growth-month {
+  display: flex;
+  align-items: flex-end;
+  gap: 1px;
+  flex-shrink: 0;
+  width: 10px;
+  height: 100%;
+  position: relative;
+}
+
+.growth-bar {
+  width: 4px;
+  border-radius: 2px 2px 0 0;
+  min-height: 2px;
+}
+.growth-bar.followers { background: var(--positive); }
+.growth-bar.following { background: var(--accent); }
+
+.growth-legend {
+  display: flex;
+  gap: 16px;
+  margin-top: 10px;
+}
+.legend-item {
+  font-size: 11px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.legend-dot { width: 7px; height: 7px; border-radius: 50%; }
+.legend-dot.followers { background: var(--positive); }
+.legend-dot.following { background: var(--accent); }
+
+/* ---------------------------------------------------------
+   Toolbar (search + sort)
 --------------------------------------------------------- */
 .toolbar {
   display: flex;
@@ -260,19 +365,23 @@ button.secondary:hover { border-color: var(--accent); color: var(--accent); }
   margin-bottom: 12px;
 }
 
-#search-input {
-  flex: 1;
+#search-input, #sort-select {
   padding: 10px 12px;
   border: 1px solid var(--border);
   border-radius: 8px;
   font-size: 13px;
-  font-family: var(--font-mono);
   background: var(--surface);
   color: var(--text);
 }
-#search-input:focus { outline: none; border-color: var(--accent); }
-#search-input::placeholder { color: var(--text-muted); }
 
+#search-input { flex: 1; }
+#search-input:focus, #sort-select:focus { outline: none; border-color: var(--accent); }
+#search-input::placeholder { color: var(--text-muted); }
+#sort-select { font-family: var(--font-body); flex-shrink: 0; }
+
+/* ---------------------------------------------------------
+   Tabs
+--------------------------------------------------------- */
 .tabs {
   display: flex;
   gap: 6px;
@@ -286,8 +395,7 @@ button.secondary:hover { border-color: var(--accent); color: var(--accent); }
   border: 1px solid var(--border);
   background: var(--surface);
   border-radius: 8px;
-  font-size: 11px;
-  font-family: var(--font-mono);
+  font-size: 11.5px;
   cursor: pointer;
   white-space: nowrap;
   color: var(--text-muted);
@@ -301,11 +409,11 @@ button.secondary:hover { border-color: var(--accent); color: var(--accent); }
 }
 
 /* ---------------------------------------------------------
-   User list — colored left-edge signals category
+   User list
 --------------------------------------------------------- */
 .user-list {
   list-style: none;
-  margin: 0 0 16px;
+  margin: 0 0 14px;
   padding: 0;
   background: var(--surface);
   border: 1px solid var(--border);
@@ -332,13 +440,13 @@ button.secondary:hover { border-color: var(--accent); color: var(--accent); }
   color: var(--text);
   text-decoration: none;
   font-family: var(--font-mono);
+  font-size: 12.5px;
 }
 .user-list a:hover { color: var(--accent); }
 
 .followed-at {
   font-size: 10px;
   color: var(--text-muted);
-  font-family: var(--font-mono);
   flex-shrink: 0;
   margin-left: 10px;
 }
@@ -348,53 +456,46 @@ button.secondary:hover { border-color: var(--accent); color: var(--accent); }
   text-align: center;
   color: var(--text-muted);
   font-size: 13px;
-  font-family: var(--font-mono);
 }
 
-.results-footer {
-  display: flex;
-  justify-content: flex-end;
-}
+.results-footer { display: flex; justify-content: flex-end; }
 
 /* ---------------------------------------------------------
-   Diff section
+   Diff
 --------------------------------------------------------- */
-.diff-toggle {
-  width: 100%;
-  text-align: left;
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-  font-size: 12px;
-  cursor: pointer;
-  padding: 4px 0;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.diff-toggle:hover { color: var(--accent); }
-
-.diff-results {
-  margin-top: 14px;
-}
-
 .diff-column-title {
-  font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 12px;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.03em;
   margin: 14px 0 8px;
 }
 .diff-column-title.added { color: var(--positive); }
 .diff-column-title.removed { color: var(--negative); }
 
 /* ---------------------------------------------------------
+   Footer
+--------------------------------------------------------- */
+.site-footer {
+  text-align: center;
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.site-footer a {
+  color: var(--text-muted);
+  text-decoration: none;
+}
+.site-footer a:hover { color: var(--accent); }
+.footer-divider { margin: 0 8px; }
+
+/* ---------------------------------------------------------
    Responsive
 --------------------------------------------------------- */
 @media (max-width: 420px) {
   .stats { grid-template-columns: repeat(3, 1fr); }
-  .stat:nth-child(4), .stat:nth-child(5) { grid-column: span 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {
