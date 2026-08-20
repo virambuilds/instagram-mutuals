@@ -40,20 +40,6 @@ wireCollapsible("howto-toggle", "howto-body", "howto-arrow");
 wireCollapsible("diff-toggle", "diff-body", "diff-arrow");
 
 /* ---------------------------------------------------------
-   Upload mode switch (zip vs individual files)
---------------------------------------------------------- */
-document.querySelectorAll(".mode-btn").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    document.querySelectorAll(".mode-btn").forEach((b) => b.classList.remove("active"));
-    btn.classList.add("active");
-
-    const mode = btn.dataset.mode;
-    document.getElementById("zip-mode").classList.toggle("hidden", mode !== "zip");
-    document.getElementById("files-mode").classList.toggle("hidden", mode !== "files");
-  });
-});
-
-/* ---------------------------------------------------------
    Zip upload flow
 --------------------------------------------------------- */
 document.getElementById("inspect-zip-btn").addEventListener("click", handleInspectZip);
@@ -139,40 +125,6 @@ async function handleAnalyzeZip() {
     applyAnalyzeResponse(data);
   } catch (err) {
     showError(err.message || "Network error.");
-  } finally {
-    btn.disabled = false;
-    btn.textContent = "Analyze";
-  }
-}
-
-/* ---------------------------------------------------------
-   Individual file upload flow
---------------------------------------------------------- */
-document.getElementById("analyze-btn").addEventListener("click", handleAnalyze);
-
-async function handleAnalyze() {
-  hideError();
-  const followersInput = document.getElementById("followers-input");
-  const followingInput = document.getElementById("following-input");
-
-  if (!followersInput.files.length) return showError("Please choose your followers_*.html file(s).");
-  if (!followingInput.files.length) return showError("Please choose your following.html file.");
-
-  const formData = new FormData();
-  for (const file of followersInput.files) formData.append("followers_files", file);
-  formData.append("following_file", followingInput.files[0]);
-
-  const btn = document.getElementById("analyze-btn");
-  btn.disabled = true;
-  btn.textContent = "Analyzing...";
-
-  try {
-    const res = await fetch(`${API_BASE}/analyze`, { method: "POST", body: formData });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || "Something went wrong analyzing your files.");
-    applyAnalyzeResponse(data);
-  } catch (err) {
-    showError(err.message || "Network error — is the backend running?");
   } finally {
     btn.disabled = false;
     btn.textContent = "Analyze";

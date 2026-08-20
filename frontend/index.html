@@ -46,47 +46,24 @@
   </section>
 
   <section id="upload-section" class="card">
-    <div class="mode-switch">
-      <button class="mode-btn active" data-mode="zip">Upload full export zip</button>
-      <button class="mode-btn" data-mode="files">Upload files individually</button>
+    <div class="field">
+      <label for="zip-input">Instagram export .zip</label>
+      <input type="file" id="zip-input" accept=".zip" />
+      <span class="hint">the file Instagram emailed you — unmodified, as downloaded</span>
     </div>
+    <button id="inspect-zip-btn" class="primary">Read zip contents</button>
 
-    <!-- ZIP MODE -->
-    <div id="zip-mode" class="upload-mode">
+    <div id="zip-picker" class="hidden zip-picker">
       <div class="field">
-        <label for="zip-input">Instagram export .zip</label>
-        <input type="file" id="zip-input" accept=".zip" />
-        <span class="hint">the file Instagram emailed you — unmodified, as downloaded</span>
-      </div>
-      <button id="inspect-zip-btn" class="primary">Read zip contents</button>
-
-      <div id="zip-picker" class="hidden zip-picker">
-        <div class="field">
-          <label>Which file is your followers list?</label>
-          <div id="zip-followers-options" class="checkbox-list"></div>
-          <span class="hint">tick one or more — Instagram splits large follower lists across files</span>
-        </div>
-        <div class="field">
-          <label>Which file is your following list?</label>
-          <div id="zip-following-options" class="radio-list"></div>
-        </div>
-        <button id="analyze-zip-btn" class="primary">Analyze</button>
-      </div>
-    </div>
-
-    <!-- INDIVIDUAL FILES MODE -->
-    <div id="files-mode" class="upload-mode hidden">
-      <div class="field">
-        <label for="followers-input">Followers file(s)</label>
-        <input type="file" id="followers-input" accept=".html" multiple />
-        <span class="hint">followers_1.html, followers_2.html...</span>
+        <label>Which file is your followers list?</label>
+        <div id="zip-followers-options" class="checkbox-list"></div>
+        <span class="hint">tick one or more — Instagram splits large follower lists across files</span>
       </div>
       <div class="field">
-        <label for="following-input">Following file</label>
-        <input type="file" id="following-input" accept=".html" />
-        <span class="hint">following.html</span>
+        <label>Which file is your following list?</label>
+        <div id="zip-following-options" class="radio-list"></div>
       </div>
-      <button id="analyze-btn" class="primary">Analyze</button>
+      <button id="analyze-zip-btn" class="primary">Analyze</button>
     </div>
 
     <p id="error-msg" class="error hidden"></p>

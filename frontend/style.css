@@ -485,10 +485,12 @@ button.secondary:hover { border-color: var(--accent); color: var(--accent); }
   color: var(--text-muted);
 }
 .site-footer a {
-  color: var(--text-muted);
-  text-decoration: none;
+  color: var(--text);
+  text-decoration: underline;
+  text-decoration-color: var(--border);
+  text-underline-offset: 3px;
 }
-.site-footer a:hover { color: var(--accent); }
+.site-footer a:hover { text-decoration-color: var(--text); }
 .footer-divider { margin: 0 8px; }
 
 /* ---------------------------------------------------------
