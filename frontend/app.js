@@ -40,36 +40,87 @@ wireCollapsible("howto-toggle", "howto-body", "howto-arrow");
 wireCollapsible("diff-toggle", "diff-body", "diff-arrow");
 
 /* ---------------------------------------------------------
-   Zip upload flow
+   Zip upload flow — auto-detect followers/following files,
+   only fall back to manual picker if detection is ambiguous.
 --------------------------------------------------------- */
-document.getElementById("inspect-zip-btn").addEventListener("click", handleInspectZip);
-document.getElementById("analyze-zip-btn").addEventListener("click", handleAnalyzeZip);
+document.getElementById("analyze-btn").addEventListener("click", handleZipAnalyze);
+document.getElementById("analyze-zip-btn").addEventListener("click", handleManualZipAnalyze);
 
-async function handleInspectZip() {
+async function handleZipAnalyze() {
   hideError();
   const zipInput = document.getElementById("zip-input");
   if (!zipInput.files.length) return showError("Please choose your Instagram export .zip file.");
 
-  const formData = new FormData();
-  formData.append("zip_file", zipInput.files[0]);
-
-  const btn = document.getElementById("inspect-zip-btn");
+  const btn = document.getElementById("analyze-btn");
   btn.disabled = true;
-  btn.textContent = "Reading...";
+  btn.textContent = "Analyzing...";
 
   try {
-    const res = await fetch(`${API_BASE}/inspect-zip`, { method: "POST", body: formData });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || "Couldn't read that zip file.");
+    const htmlFiles = await inspectZip(zipInput.files[0]);
+    const detected = autoDetectFiles(htmlFiles);
 
-    populateZipPickers(data.html_files);
-    document.getElementById("zip-picker").classList.remove("hidden");
+    if (!detected) {
+      // Ambiguous or nothing found — hand off to the manual picker
+      // instead of guessing wrong silently.
+      populateZipPickers(htmlFiles);
+      document.getElementById("zip-picker").classList.remove("hidden");
+      return;
+    }
+
+    await analyzeZipFiles(zipInput.files[0], detected.followers, detected.following);
   } catch (err) {
     showError(err.message || "Network error.");
   } finally {
     btn.disabled = false;
-    btn.textContent = "Read zip contents";
+    btn.textContent = "Analyze";
   }
+}
+
+async function inspectZip(zipFile) {
+  const formData = new FormData();
+  formData.append("zip_file", zipFile);
+  const res = await fetch(`${API_BASE}/inspect-zip`, { method: "POST", body: formData });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.detail || "Couldn't read that zip file.");
+  return data.html_files;
+}
+
+/**
+ * Picks the followers file(s) and following file automatically by
+ * filename pattern. Returns null (triggering the manual fallback) if
+ * there isn't exactly one unambiguous following file, or no followers
+ * files at all — better to ask than guess wrong on the actual data.
+ */
+function autoDetectFiles(htmlFiles) {
+  const followers = [];
+  const followingCandidates = [];
+
+  for (const path of htmlFiles) {
+    const filename = path.split("/").pop().toLowerCase();
+    if (filename === "following.html") {
+      followingCandidates.push(path);
+    } else if (/^followers(_\d+)?\.html$/.test(filename)) {
+      followers.push(path);
+    }
+  }
+
+  if (followers.length === 0 || followingCandidates.length !== 1) {
+    return null;
+  }
+
+  return { followers, following: followingCandidates[0] };
+}
+
+async function analyzeZipFiles(zipFile, followersPaths, followingPath) {
+  const formData = new FormData();
+  formData.append("zip_file", zipFile);
+  formData.append("followers_paths", followersPaths.join(","));
+  formData.append("following_path", followingPath);
+
+  const res = await fetch(`${API_BASE}/analyze-zip`, { method: "POST", body: formData });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.detail || "Something went wrong analyzing your files.");
+  applyAnalyzeResponse(data);
 }
 
 function populateZipPickers(htmlFiles) {
@@ -78,8 +129,6 @@ function populateZipPickers(htmlFiles) {
   followersBox.innerHTML = "";
   followingBox.innerHTML = "";
 
-  // Pre-select sensible defaults based on filename, so most people
-  // don't have to think about it — they can still override.
   for (const path of htmlFiles) {
     const filename = path.split("/").pop().toLowerCase();
 
@@ -99,35 +148,27 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
-async function handleAnalyzeZip() {
+async function handleManualZipAnalyze() {
   hideError();
   const zipInput = document.getElementById("zip-input");
   const followersChecked = [...document.querySelectorAll("#zip-followers-options input:checked")].map((el) => el.value);
   const followingChosen = document.querySelector("#zip-following-options input:checked");
 
-  if (!zipInput.files.length) return showError("Zip file missing — try reading it again.");
+  if (!zipInput.files.length) return showError("Zip file missing — try again.");
   if (followersChecked.length === 0) return showError("Please select at least one followers file.");
   if (!followingChosen) return showError("Please select your following file.");
-
-  const formData = new FormData();
-  formData.append("zip_file", zipInput.files[0]);
-  formData.append("followers_paths", followersChecked.join(","));
-  formData.append("following_path", followingChosen.value);
 
   const btn = document.getElementById("analyze-zip-btn");
   btn.disabled = true;
   btn.textContent = "Analyzing...";
 
   try {
-    const res = await fetch(`${API_BASE}/analyze-zip`, { method: "POST", body: formData });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || "Something went wrong analyzing your files.");
-    applyAnalyzeResponse(data);
+    await analyzeZipFiles(zipInput.files[0], followersChecked, followingChosen.value);
   } catch (err) {
     showError(err.message || "Network error.");
   } finally {
     btn.disabled = false;
-    btn.textContent = "Analyze";
+    btn.textContent = "Analyze with these files";
   }
 }
 
@@ -175,7 +216,11 @@ function renderDateRangeBanner(followersRange, followingRange) {
 function renderGrowthChart(timeline) {
   const section = document.getElementById("growth-chart-section");
   const chart = document.getElementById("growth-chart");
+  const xaxis = document.getElementById("growth-xaxis");
+  const yaxis = document.getElementById("growth-yaxis");
   chart.innerHTML = "";
+  xaxis.innerHTML = "";
+  yaxis.innerHTML = "";
 
   if (!timeline || timeline.length === 0) {
     section.classList.add("hidden");
@@ -184,7 +229,16 @@ function renderGrowthChart(timeline) {
 
   const maxValue = Math.max(1, ...timeline.map((m) => Math.max(m.followers_gained, m.following_gained)));
 
-  for (const month of timeline) {
+  // Y-axis: three reference lines, top to bottom (CSS renders this
+  // column top-aligned to match the bar area).
+  yaxis.innerHTML = `<span>${maxValue}</span><span>${Math.round(maxValue / 2)}</span><span>0</span>`;
+
+  // X-axis: labelling every month would overlap at any real data
+  // volume, so only label a subset — spaced out enough to stay
+  // readable, always including the first and last month.
+  const labelEvery = Math.max(1, Math.ceil(timeline.length / 10));
+
+  timeline.forEach((month, i) => {
     const col = document.createElement("div");
     col.className = "growth-month";
     col.title = `${month.month}: +${month.followers_gained} followers, +${month.following_gained} following`;
@@ -200,9 +254,24 @@ function renderGrowthChart(timeline) {
     col.appendChild(followerBar);
     col.appendChild(followingBar);
     chart.appendChild(col);
-  }
+
+    const label = document.createElement("div");
+    label.className = "growth-xaxis-label";
+    const isEdge = i === 0 || i === timeline.length - 1;
+    if (isEdge || i % labelEvery === 0) {
+      label.textContent = formatMonthLabel(month.month);
+    }
+    xaxis.appendChild(label);
+  });
 
   section.classList.remove("hidden");
+}
+
+function formatMonthLabel(monthKey) {
+  // monthKey is "YYYY-MM"
+  const [year, month] = monthKey.split("-");
+  const date = new Date(Number(year), Number(month) - 1, 1);
+  return date.toLocaleDateString(undefined, { month: "short", year: "2-digit" });
 }
 
 /* ---------------------------------------------------------

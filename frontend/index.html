@@ -51,9 +51,13 @@
       <input type="file" id="zip-input" accept=".zip" />
       <span class="hint">the file Instagram emailed you — unmodified, as downloaded</span>
     </div>
-    <button id="inspect-zip-btn" class="primary">Read zip contents</button>
+    <button id="analyze-btn" class="primary">Analyze</button>
 
+    <!-- Fallback only: shown when auto-detection can't confidently
+         find followers/following files inside the zip. Most users
+         never see this. -->
     <div id="zip-picker" class="hidden zip-picker">
+      <p class="hint fallback-note">Couldn't automatically identify the right files — please pick them manually below.</p>
       <div class="field">
         <label>Which file is your followers list?</label>
         <div id="zip-followers-options" class="checkbox-list"></div>
@@ -63,7 +67,7 @@
         <label>Which file is your following list?</label>
         <div id="zip-following-options" class="radio-list"></div>
       </div>
-      <button id="analyze-zip-btn" class="primary">Analyze</button>
+      <button id="analyze-zip-btn" class="primary">Analyze with these files</button>
     </div>
 
     <p id="error-msg" class="error hidden"></p>
@@ -85,7 +89,13 @@
 
     <div id="growth-chart-section" class="card hidden">
       <p class="card-title">Growth over time</p>
-      <div id="growth-chart" class="growth-chart"></div>
+      <div class="growth-chart-wrap">
+        <div id="growth-yaxis" class="growth-yaxis"></div>
+        <div class="growth-chart-scroll">
+          <div id="growth-chart" class="growth-chart"></div>
+          <div id="growth-xaxis" class="growth-xaxis"></div>
+        </div>
+      </div>
       <div class="growth-legend">
         <span class="legend-item"><span class="legend-dot followers"></span>Followers gained</span>
         <span class="legend-item"><span class="legend-dot following"></span>Following added</span>

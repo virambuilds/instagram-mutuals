@@ -249,6 +249,7 @@ button.secondary:hover { border-color: var(--accent); color: var(--accent); }
 }
 
 .zip-picker { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+.fallback-note { margin-bottom: 12px; color: var(--warning); }
 
 .checkbox-list, .radio-list {
   display: flex;
@@ -313,13 +314,35 @@ button.secondary:hover { border-color: var(--accent); color: var(--accent); }
 /* ---------------------------------------------------------
    Growth chart — hand-built bars, no dependency
 --------------------------------------------------------- */
+.growth-chart-wrap {
+  display: flex;
+  gap: 8px;
+}
+
+.growth-yaxis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100px;
+  padding-top: 10px;
+  font-size: 9px;
+  color: var(--text-muted);
+  text-align: right;
+  flex-shrink: 0;
+  width: 24px;
+}
+
+.growth-chart-scroll {
+  flex: 1;
+  overflow-x: auto;
+}
+
 .growth-chart {
   display: flex;
   align-items: flex-end;
   gap: 3px;
   height: 100px;
   padding-top: 10px;
-  overflow-x: auto;
 }
 
 .growth-month {
@@ -340,10 +363,26 @@ button.secondary:hover { border-color: var(--accent); color: var(--accent); }
 .growth-bar.followers { background: var(--positive); }
 .growth-bar.following { background: var(--accent); }
 
+.growth-xaxis {
+  display: flex;
+  gap: 3px;
+  margin-top: 4px;
+}
+
+.growth-xaxis-label {
+  flex-shrink: 0;
+  width: 10px;
+  font-size: 8px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  transform: rotate(-55deg) translateX(-4px);
+  transform-origin: top left;
+}
+
 .growth-legend {
   display: flex;
   gap: 16px;
-  margin-top: 10px;
+  margin-top: 30px;
 }
 .legend-item {
   font-size: 11px;
